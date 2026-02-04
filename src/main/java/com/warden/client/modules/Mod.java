@@ -8,12 +8,21 @@ import java.util.List;
 public class Mod {
     public String name;
     public boolean enabled = false;
-    public boolean expanded = false; // Menüde ayarları açık mı?
-    public List<NumberSetting> settings = new ArrayList<>(); // Ayar listesi
-    protected static MinecraftClient mc = MinecraftClient.getInstance();
+    public boolean expanded = false;
+    public Category category; // Meteor stili için kategori
+    public List<NumberSetting> settings = new ArrayList<>();
+    
+    // Alt sınıfların erişebileceği güvenli Minecraft örneği
+    protected final MinecraftClient mc = MinecraftClient.getInstance();
 
-    public Mod(String name) {
+    // Kategoriler
+    public enum Category {
+        COMBAT, MOVEMENT, RENDER, PLAYER, WORLD
+    }
+
+    public Mod(String name, Category category) {
         this.name = name;
+        this.category = category;
     }
 
     public void addSetting(NumberSetting setting) {
