@@ -21,9 +21,9 @@ jobs:
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4 # Versiyonu v4'e çekmek daha iyidir
+        uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: 8.10 # Sadece bu kalsın! 8.5 olanı sildik.
+          gradle-version: '8.10' # Tırnak içinde olması daha güvenlidir
 
       - name: Build with Gradle
         run: gradle assemble --no-daemon
@@ -36,7 +36,7 @@ jobs:
         with:
           tag_name: v1.1.${{ github.run_number }}
           name: Warden Client v1.1.${{ github.run_number }}
-          body: "Warden Client 1.21.4 Sürümüne Taşındı!"
+          body: "Warden Client 1.21.4 Sürümüne Taşındı! Java 21 ve Gradle 8.10 kullanıldı."
           draft: false
           prerelease: false
           files: "**/build/libs/*.jar"
