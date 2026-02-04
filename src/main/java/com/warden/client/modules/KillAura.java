@@ -1,19 +1,18 @@
 package com.warden.client.modules;
 
-import com.warden.client.WardenClient; // Reach modülüne erişmek için
+import com.warden.client.WardenClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Hand;
 
 public class KillAura extends Mod {
-    public KillAura() { super("KillAura"); }
+    public KillAura() { super("KillAura", Category.COMBAT); }
 
     @Override
     public void onTick() {
-        if (!enabled || mc.player == null || mc.world == null) return;
+        if (nullCheck()) return;
         
-        // Reach modülü açıksa onun ayarını, kapalıysa 3.0 (default) al
-        double range = WardenClient.reach.enabled ? WardenClient.reach.reachDistance.getValue() : 3.0;
+        double range = WardenClient.reach.enabled ? Reach.reachDistance.getValue() : 3.0;
 
         for (Entity target : mc.world.getEntities()) {
             if (target instanceof LivingEntity && target != mc.player && target.isAlive()) {
