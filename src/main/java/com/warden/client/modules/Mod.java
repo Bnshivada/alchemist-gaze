@@ -8,19 +8,18 @@ import java.util.List;
 public class Mod {
     public String name;
     public boolean enabled = false;
-    public boolean expanded = false; // Menüde ayarların açık olup olmadığı
+    public boolean expanded = false;
     public Category category; 
     public List<NumberSetting> settings = new ArrayList<>();
     
-    // Her modülün Minecraft instance'ına güvenli erişimi
+    // Alt sınıflar buna direkt 'mc' yazarak erişebilir
     protected final MinecraftClient mc = MinecraftClient.getInstance();
 
-    // Kategorileri iç (inner) enum olarak tanımlıyoruz
+    // Kategorileri buraya düzgünce koyduk
     public enum Category {
         COMBAT, MOVEMENT, RENDER, PLAYER, WORLD
     }
 
-    // Constructor: Artık her modül isim ve kategori ile doğmak zorunda
     public Mod(String name, Category category) {
         this.name = name;
         this.category = category;
@@ -32,19 +31,14 @@ public class Mod {
 
     public void toggle() {
         this.enabled = !this.enabled;
-        if (enabled) {
-            onEnable();
-        } else {
-            onDisable();
-        }
+        if (enabled) onEnable(); else onDisable();
     }
 
-    // Alt sınıflar tarafından doldurulacak metodlar
     public void onEnable() {}
     public void onDisable() {}
     public void onTick() {}
 
-    // Yardımcı: Oyuncu dünyada değilse modülün hata vermesini önlemek için kullanılabilir
+    // Güvenlik kontrolü
     protected boolean nullCheck() {
         return mc.player == null || mc.world == null;
     }
