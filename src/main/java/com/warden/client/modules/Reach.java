@@ -1,6 +1,8 @@
 package com.warden.client.modules;
 
 import com.warden.client.settings.NumberSetting;
+// EKSİK OLAN SATIR BUYDU:
+import com.warden.client.modules.Mod.Category;
 
 public class Reach extends Mod {
     public static NumberSetting reachDistance = new NumberSetting("Mesafe", 4.0, 3.0, 6.0, 0.1);
