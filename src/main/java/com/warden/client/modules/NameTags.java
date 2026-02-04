@@ -38,10 +38,10 @@ public class NameTags extends Mod {
             }
 
             if (!label.isEmpty()) {
-                // ÇARPI BURADAYSA: tickCounter() yerine direkt getTickDelta'yı deneyelim
-                float tickDelta = context.tickDelta(); 
-                Vec3d pos = entity.getLerpedPos(tickDelta).add(0, entity.getHeight() + 0.5, 0);
+                // 1.21.4'te tickDelta alma yöntemi düzeltildi:
+                float tickDelta = context.tickCounter().getTickDelta(true);
                 
+                Vec3d pos = entity.getLerpedPos(tickDelta).add(0, entity.getHeight() + 0.5, 0);
                 renderTextInWorld(context, label, pos);
             }
         }
@@ -56,6 +56,7 @@ public class NameTags extends Mod {
         Vec3d camPos = context.camera().getPos();
         matrices.translate(pos.x - camPos.x, pos.y - camPos.y, pos.z - camPos.z);
         
+        // Kameraya bakma (billboarding) ayarları
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-context.camera().getYaw()));
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(context.camera().getPitch()));
         
@@ -67,8 +68,19 @@ public class NameTags extends Mod {
         
         float xOffset = (float) (-tr.getWidth(text) / 2);
         
-        // ÇARPI BURADAYSA: tr.draw metodunun parametrelerini 1.21.4'e göre güncelleyelim
-        tr.draw(text, xOffset, 0, 0xFFFFFFFF, false, matrix4f, consumers, TextRenderer.TextLayerType.SEE_THROUGH, 0x80000000, 15728880);
+        // 1.21.4 uyumlu TextRenderer Draw metodu:
+        tr.draw(
+            text, 
+            xOffset, 
+            0, 
+            0xFFFFFFFF, 
+            false, 
+            matrix4f, 
+            consumers, 
+            TextRenderer.TextLayerType.SEE_THROUGH, 
+            0x80000000, 
+            0xF000F0 // Işık seviyesi (Lightmap)
+        );
 
         matrices.pop();
     }
