@@ -10,15 +10,13 @@ public class NoFall extends Mod {
 
     @Override
     public void onTick() {
-        // nullCheck, Mod.java'da tanımlı olmalı
         if (nullCheck()) return;
 
-        // Düşme mesafesi 2.5 bloğu geçtiğinde
         if (mc.player.fallDistance > 2.5f) {
-            // 1.21.4 Paket Yapısı: Sadece yere basıp basmadığını (onGround) gönderir.
-            // Bu, sunucuya "şu an güvenli bir şekilde yere bastım" sinyali verir.
             if (mc.getNetworkHandler() != null) {
-                mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
+                // HATA BURADAYDI: İki tane boolean ekliyoruz.
+                // Birincisi 'onGround' (true), ikincisi genellikle 'horizontalCollision' veya 'jump' (false)
+                mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, false));
             }
         }
     }
