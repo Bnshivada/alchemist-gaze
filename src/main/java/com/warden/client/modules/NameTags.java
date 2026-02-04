@@ -4,10 +4,12 @@ import com.warden.client.modules.Mod.Category;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
 
@@ -20,34 +22,56 @@ public class NameTags extends Mod {
     }
 
     private void renderTags(WorldRenderContext context) {
-        if (!enabled || mc.world == null) return;
+        if (!enabled || mc.world == null || mc.player == null) return;
 
-        TextRenderer tr = mc.textRenderer;
-        
         for (Entity entity : mc.world.getEntities()) {
             if (entity == mc.player) continue;
 
             String label = "";
-            int color = 0xFFFFFFFF;
 
-            // OYUNCU KONTROLÜ
             if (entity instanceof PlayerEntity player) {
                 int health = (int) (player.getHealth() + player.getAbsorptionAmount());
-                label = player.getEntityName() + " §c" + health + "❤";
+                label = player.getName().getString() + " §c" + health + "❤";
             } 
-            // YERDEKİ EŞYA KONTROLÜ
             else if (entity instanceof ItemEntity item) {
                 label = item.getStack().getName().getString() + " §bx" + item.getStack().getCount();
             }
 
             if (!label.isEmpty()) {
-                renderTextInWorld(context, label, entity.getLerpedPos(context.tickCounter().getTickDelta(true)).add(0, entity.getHeight() + 0.5, 0));
+                // 1.21.4 uyumlu konum alma (TickDelta kullanımı)
+                float tickDelta = context.tickCounter().getTickDelta(true);
+                Vec3d pos = entity.getLerpedPos(tickDelta).add(0, entity.getHeight() + 0.5, 0);
+                
+                renderTextInWorld(context, label, pos);
             }
         }
     }
 
     private void renderTextInWorld(WorldRenderContext context, String text, Vec3d pos) {
-        // Bu kısım metni dünyanın içinde, oyuncuya bakacak şekilde render eder
-        // Basitlik için HudRender üzerinden de yapılabilir ama WorldRender daha stabildir.
+        MatrixStack matrices = context.matrixStack();
+        TextRenderer tr = mc.textRenderer;
+        
+        matrices.push();
+        
+        // Kameraya göre pozisyonu ayarla
+        Vec3d camPos = context.camera().getPos();
+        matrices.translate(pos.x - camPos.x, pos.y - camPos.y, pos.z - camPos.z);
+        
+        // Metnin her zaman oyuncuya bakmasını sağla
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-context.camera().getYaw()));
+        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(context.camera().getPitch()));
+        
+        // Metni okunabilir boyuta getir (Ters dönmemesi için negatif scale)
+        float scale = 0.025f;
+        matrices.scale(-scale, -scale, scale);
+
+        Matrix4f matrix4f = matrices.peek().getPositionMatrix();
+        VertexConsumerProvider consumers = context.consumers();
+        
+        // Arka plan kutusu ve metni çiz
+        float xOffset = (float) (-tr.getWidth(text) / 2);
+        tr.draw(text, xOffset, 0, 0xFFFFFFFF, false, matrix4f, consumers, TextRenderer.TextLayerType.SEE_THROUGH, 0x80000000, 15728880);
+
+        matrices.pop();
     }
 }
