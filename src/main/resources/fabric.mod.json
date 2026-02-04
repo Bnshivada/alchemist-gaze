@@ -3,17 +3,17 @@
   "id": "wardenclient",
   "version": "1.0.0",
   "name": "Warden Client",
-  "description": "Profesyonel hile arayüzü.",
+  "description": "Profesyonel hile clienti",
   "authors": ["Shivada"],
-  "contact": { "sources": "https://github.com/KullaniciAdin/Warden-Client" },
+  "contact": { "sources": "https://github.com/Bnshivada/Warden-Client" },
   "license": "MIT",
   "environment": "*",
   "entrypoints": {
     "client": [ "com.warden.client.WardenClient" ]
   },
   "depends": {
-    "fabricloader": ">=0.14.21",
-    "minecraft": "~1.20.1",
-    "java": ">=17"
+    "fabricloader": ">=0.16.9",
+    "minecraft": "~1.21.4",
+    "java": ">=21"
   }
 }
