@@ -3,10 +3,13 @@
   "id": "wardenclient",
   "version": "1.0.0",
   "name": "Warden Client",
+  "description": "Profesyonel hile arayüzü.",
+  "authors": ["Shivada"],
+  "contact": { "sources": "https://github.com/KullaniciAdin/Warden-Client" },
+  "license": "MIT",
+  "environment": "*",
   "entrypoints": {
-    "client": [
-      "com.warden.client.WardenClient"
-    ]
+    "client": [ "com.warden.client.WardenClient" ]
   },
   "depends": {
     "fabricloader": ">=0.14.21",
