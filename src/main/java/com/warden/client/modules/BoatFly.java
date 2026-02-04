@@ -8,7 +8,7 @@ public class BoatFly extends Mod {
     public NumberSetting speed = new NumberSetting("Hız", 1.0, 0.1, 30.0, 0.5);
 
     public BoatFly() {
-        super("BoatFly");
+        super("BoatFly", Category.MOVEMENT);
         addSetting(speed);
     }
 
@@ -19,8 +19,8 @@ public class BoatFly extends Mod {
             Vec3d velocity = mc.player.getRotationVector().multiply(flySpeed);
             
             double vertical = 0;
-            if (mc.options.jumpKey.isPressed()) vertical = 0.5; // Space ile yukarı
-            else if (mc.options.sprintKey.isPressed()) vertical = -0.5; // CTRL ile aşağı (Sprint tuşu genellikle CTRL'dir)
+            if (mc.options.jumpKey.isPressed()) vertical = 0.5;
+            else if (mc.options.sprintKey.isPressed()) vertical = -0.5;
 
             boat.setVelocity(velocity.x, vertical, velocity.z);
         }
