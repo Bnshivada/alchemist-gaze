@@ -2,73 +2,92 @@ package com.warden.client.gui;
 
 import com.warden.client.WardenClient;
 import com.warden.client.modules.Mod;
-import com.warden.client.settings.NumberSetting;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 
-public class WardenMenuScreen extends Screen {
-    private final MinecraftClient mc = MinecraftClient.getInstance();
+import java.util.ArrayList;
+import java.util.List;
 
+public class WardenMenuScreen extends Screen {
     public WardenMenuScreen() {
         super(Text.literal("Warden ClickGUI"));
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        context.fill(0, 0, this.width, this.height, 0x90000000); // Background
-        
-        int panelX = 50, panelY = 50, width = 120, height = 20;
-        context.fill(panelX, panelY, panelX + width, panelY + height, 0xFF9400D3);
-        context.drawTextWithShadow(textRenderer, "Warden Client", panelX + 5, panelY + 6, 0xFFFFFF);
+        // Arka planı hafif karartalım (Sinematik etki)
+        context.fill(0, 0, this.width, this.height, 0x70000000);
 
-        int offsetY = height;
-        for (Mod mod : WardenClient.modules) {
-            int color = mod.enabled ? 0xFF9932CC : 0x80000000;
-            context.fill(panelX, panelY + offsetY, panelX + width, panelY + offsetY + height, color);
-            context.drawTextWithShadow(textRenderer, mod.name, panelX + 5, panelY + offsetY + 6, 0xFFFFFF);
-            offsetY += height;
+        int startX = 30; // İlk sütunun X koordinatı
+        int width = 100; // Sütun genişliği
+        int titleHeight = 18; // Kategori başlığı yüksekliği
+        int moduleHeight = 16; // Modül satırı yüksekliği
 
-            if (mod.expanded) {
-                for (NumberSetting set : mod.settings) {
-                    context.fill(panelX, panelY + offsetY, panelX + width, panelY + offsetY + height, 0x90000000);
-                    double percent = (set.getValue() - set.min) / (set.max - set.min);
-                    context.fill(panelX, panelY + offsetY + 14, panelX + (int)(width * percent), panelY + offsetY + 18, 0xFF00FFFF);
-                    context.drawTextWithShadow(textRenderer, set.name + ": " + String.format("%.1f", set.getValue()), panelX + 5, panelY + offsetY + 4, 0xAAAAAA);
-                    offsetY += height;
+        // Her bir kategoriyi döngüye alalım
+        for (Mod.Category category : Mod.Category.values()) {
+            int currentY = 30;
+
+            // 1. KATEGORİ BAŞLIĞI (Koyu Gri/Siyah Panel)
+            context.fill(startX, currentY, startX + width, currentY + titleHeight, 0xFF151515);
+            context.drawTextWithShadow(textRenderer, category.name(), startX + 5, currentY + 5, 0xFF00AAFF); // Mavi Başlık
+            
+            currentY += titleHeight;
+
+            // 2. MODÜLLERİ LİSTELE
+            for (Mod mod : WardenClient.modules) {
+                if (mod.category == category) {
+                    // Modül kutusu arka planı (Aktifse daha açık gri, değilse koyu)
+                    int bgColor = mod.enabled ? 0xFF282828 : 0xFF101010;
+                    context.fill(startX, currentY, startX + width, currentY + moduleHeight, bgColor);
+                    
+                    // Aktif modülün yanına küçük mavi bir şerit (Meteor imzası)
+                    if (mod.enabled) {
+                        context.fill(startX, currentY, startX + 2, currentY + moduleHeight, 0xFF00AAFF);
+                    }
+
+                    // Modül ismi (Aktifse beyaz, değilse gri)
+                    int textColor = mod.enabled ? 0xFFFFFFFF : 0xFFAAAAAA;
+                    context.drawTextWithShadow(textRenderer, mod.name, startX + 6, currentY + 4, textColor);
+
+                    currentY += moduleHeight;
                 }
             }
+            
+            // Bir sonraki kategori sütununa geç (Arada 10px boşluk bırak)
+            startX += width + 10;
         }
+
         super.render(context, mouseX, mouseY, delta);
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        int panelX = 50, panelY = 50 + 20, width = 120, height = 20;
-        for (Mod mod : WardenClient.modules) {
-            if (isHovered(mouseX, mouseY, panelX, panelY, width, height)) {
-                if (button == 0) mod.toggle();
-                else if (button == 1) mod.expanded = !mod.expanded;
-                return true;
-            }
-            panelY += height;
-            if (mod.expanded) {
-                for (NumberSetting set : mod.settings) {
-                    if (isHovered(mouseX, mouseY, panelX, panelY, width, height)) {
-                        if (button == 0) set.setValue(set.getValue() + set.increment);
-                        if (button == 1) set.setValue(set.getValue() - set.increment);
+        int startX = 30;
+        int width = 100;
+        int titleHeight = 18;
+        int moduleHeight = 16;
+
+        for (Mod.Category category : Mod.Category.values()) {
+            int currentY = 30 + titleHeight; // Başlığı atla, modüllere gel
+
+            for (Mod mod : WardenClient.modules) {
+                if (mod.category == category) {
+                    // Farenin modülün üstünde olup olmadığını kontrol et
+                    if (mouseX >= startX && mouseX <= startX + width && mouseY >= currentY && mouseY <= currentY + moduleHeight) {
+                        mod.toggle(); // Modülü aç/kapat
                         return true;
                     }
-                    panelY += height;
+                    currentY += moduleHeight;
                 }
             }
+            startX += width + 10;
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
-    private boolean isHovered(double mouseX, double mouseY, int x, int y, int width, int height) {
-        return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
+    @Override
+    public boolean shouldPause() {
+        return false; // Menü açıldığında oyun (singleplayer) durmasın
     }
-    @Override public boolean shouldPause() { return false; }
 }
